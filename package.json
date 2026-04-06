@@ -1,6 +1,6 @@
 {
   "name": "gan-harness",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Production safety net for AI agents — guardrails + evaluation + auto-learning",
   "type": "module",
   "bin": {
