@@ -2,10 +2,10 @@
 import { resolve } from "node:path";
 import chalk from "chalk";
 import { Command } from "commander";
+import { pushToCloud } from "./cloud.js";
 import { loadConfig } from "./config.js";
 import { initHarness } from "./init.js";
 import { verify } from "./layer1/index.js";
-import { pushToCloud } from "./cloud.js";
 import type { CheckResult, VerifyResult } from "./types.js";
 
 const program = new Command();
@@ -41,28 +41,31 @@ program
 	.argument("[dir]", "target directory", ".")
 	.option("--json", "output as JSON")
 	.option("--cloud [url]", "sync results to Pro dashboard")
-	.action(async (dir: string, opts: { json?: boolean; cloud?: boolean | string }) => {
-		const targetDir = resolve(dir);
-		const config = await loadConfig(targetDir);
-		const result = await verify(config);
-		if (opts.json) {
-			console.log(JSON.stringify(result, null, 2));
-		} else {
-			printResult(result);
-		}
-		// Cloud sync
-		if (opts.cloud) {
-			const apiUrl = typeof opts.cloud === "string" ? opts.cloud : "http://localhost:8090";
-			const apiKey = process.env.HARNESS_API_KEY;
-			const sync = await pushToCloud(result, apiUrl, apiKey);
-			if (!opts.json) {
-				const icon = sync.ok ? chalk.green("✓") : chalk.red("✗");
-				console.log(`  ${icon} Cloud: ${sync.detail}\n`);
+	.action(
+		async (dir: string, opts: { json?: boolean; cloud?: boolean | string }) => {
+			const targetDir = resolve(dir);
+			const config = await loadConfig(targetDir);
+			const result = await verify(config);
+			if (opts.json) {
+				console.log(JSON.stringify(result, null, 2));
+			} else {
+				printResult(result);
 			}
-		}
+			// Cloud sync
+			if (opts.cloud) {
+				const apiUrl =
+					typeof opts.cloud === "string" ? opts.cloud : "http://localhost:8090";
+				const apiKey = process.env.HARNESS_API_KEY;
+				const sync = await pushToCloud(result, apiUrl, apiKey);
+				if (!opts.json) {
+					const icon = sync.ok ? chalk.green("✓") : chalk.red("✗");
+					console.log(`  ${icon} Cloud: ${sync.detail}\n`);
+				}
+			}
 
-		process.exitCode = result.finalGate === "BLOCK" ? 2 : 0;
-	});
+			process.exitCode = result.finalGate === "BLOCK" ? 2 : 0;
+		},
+	);
 
 function statusIcon(status: string): string {
 	if (status === "PASS") return chalk.green("✓");
