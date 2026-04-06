@@ -1,0 +1,50 @@
+{
+  "name": "gan-harness",
+  "version": "0.1.0",
+  "description": "Production safety net for AI agents — guardrails + evaluation + auto-learning",
+  "type": "module",
+  "bin": {
+    "gan-harness": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai-agent",
+    "guardrails",
+    "evaluation",
+    "safety",
+    "harness",
+    "claude",
+    "llm"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "chalk": "^5.4.0",
+    "glob": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
