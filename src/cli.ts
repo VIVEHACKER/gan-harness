@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { loadConfig } from "./config.js";
 import { initHarness } from "./init.js";
 import { verify } from "./layer1/index.js";
+import { pushToCloud } from "./cloud.js";
 import type { CheckResult, VerifyResult } from "./types.js";
 
 const program = new Command();
@@ -39,7 +40,8 @@ program
 	.description("Run Layer 1 verification (build/test/lint/typecheck/secrets)")
 	.argument("[dir]", "target directory", ".")
 	.option("--json", "output as JSON")
-	.action(async (dir: string, opts: { json?: boolean }) => {
+	.option("--cloud [url]", "sync results to Pro dashboard")
+	.action(async (dir: string, opts: { json?: boolean; cloud?: boolean | string }) => {
 		const targetDir = resolve(dir);
 		const config = await loadConfig(targetDir);
 		const result = await verify(config);
@@ -48,6 +50,17 @@ program
 		} else {
 			printResult(result);
 		}
+		// Cloud sync
+		if (opts.cloud) {
+			const apiUrl = typeof opts.cloud === "string" ? opts.cloud : "http://localhost:8090";
+			const apiKey = process.env.HARNESS_API_KEY;
+			const sync = await pushToCloud(result, apiUrl, apiKey);
+			if (!opts.json) {
+				const icon = sync.ok ? chalk.green("✓") : chalk.red("✗");
+				console.log(`  ${icon} Cloud: ${sync.detail}\n`);
+			}
+		}
+
 		process.exitCode = result.finalGate === "BLOCK" ? 2 : 0;
 	});
 
