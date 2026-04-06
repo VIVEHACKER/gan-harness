@@ -7,9 +7,11 @@ export async function pushToCloud(
 	apiUrl: string = DEFAULT_API,
 	apiKey?: string,
 ): Promise<{ ok: boolean; detail: string }> {
-	const headers: Record<string, string> = { "Content-Type": "application/json" };
+	const headers: Record<string, string> = {
+		"Content-Type": "application/json",
+	};
 	if (apiKey) {
-		headers["Authorization"] = `Bearer ${apiKey}`;
+		headers.Authorization = `Bearer ${apiKey}`;
 	}
 
 	// Push verify result as eval record
