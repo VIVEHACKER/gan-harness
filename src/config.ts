@@ -15,6 +15,35 @@ const DEFAULTS: HarnessConfig = {
 		timeoutSec: 60,
 	},
 	layer2SkipMaxLines: 20,
+	mutation: {
+		enabled: true,
+		maxMutants: 20,
+		scoreWarn: 0.6,
+		scoreBlock: 0.3,
+	},
+	sandbox: {
+		enabled: false,
+		cpus: "1",
+		memoryMb: 512,
+		perCheckTimeoutSec: 30,
+		totalTimeoutSec: 120,
+		image: "node:22-slim",
+		fallbackOnError: true,
+	},
+	pbt: {
+		enabled: true,
+		numRuns: 100,
+		maxFunctions: 10,
+		timeoutSec: 30,
+	},
+	evolution: {
+		enabled: false,
+		populationSize: 4,
+		maxGenerations: 5,
+		mutationRate: 0.3,
+		crossoverRate: 0.5,
+		eliteCount: 1,
+	},
 };
 
 interface ConfigFile {
@@ -76,6 +105,40 @@ export async function loadConfig(targetDir: string): Promise<HarnessConfig> {
 			fromEnv.layer2SkipMaxLines ??
 			fromFile.layer2_skip_max_lines ??
 			DEFAULTS.layer2SkipMaxLines,
+		mutation: {
+			enabled:
+				process.env.HARNESS_MUTATION_ENABLED !== "false" &&
+				DEFAULTS.mutation.enabled,
+			maxMutants:
+				envInt("HARNESS_MUTATION_MAX") ?? DEFAULTS.mutation.maxMutants,
+			scoreWarn: DEFAULTS.mutation.scoreWarn,
+			scoreBlock: DEFAULTS.mutation.scoreBlock,
+		},
+		sandbox: {
+			enabled: process.env.HARNESS_SANDBOX_ENABLED === "true",
+			cpus: DEFAULTS.sandbox.cpus,
+			memoryMb: envInt("HARNESS_SANDBOX_MEMORY") ?? DEFAULTS.sandbox.memoryMb,
+			perCheckTimeoutSec: DEFAULTS.sandbox.perCheckTimeoutSec,
+			totalTimeoutSec: DEFAULTS.sandbox.totalTimeoutSec,
+			image: process.env.HARNESS_SANDBOX_IMAGE ?? DEFAULTS.sandbox.image,
+			fallbackOnError: DEFAULTS.sandbox.fallbackOnError,
+		},
+		pbt: {
+			enabled:
+				process.env.HARNESS_PBT_ENABLED !== "false" && DEFAULTS.pbt.enabled,
+			numRuns: envInt("HARNESS_PBT_RUNS") ?? DEFAULTS.pbt.numRuns,
+			maxFunctions: DEFAULTS.pbt.maxFunctions,
+			timeoutSec: DEFAULTS.pbt.timeoutSec,
+		},
+		evolution: {
+			enabled: process.env.HARNESS_EVOLUTION_ENABLED === "true",
+			populationSize:
+				envInt("HARNESS_EVOLUTION_POP") ?? DEFAULTS.evolution.populationSize,
+			maxGenerations: DEFAULTS.evolution.maxGenerations,
+			mutationRate: DEFAULTS.evolution.mutationRate,
+			crossoverRate: DEFAULTS.evolution.crossoverRate,
+			eliteCount: DEFAULTS.evolution.eliteCount,
+		},
 	};
 }
 

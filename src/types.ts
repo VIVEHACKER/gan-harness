@@ -62,6 +62,10 @@ export interface HarnessConfig {
 		readonly timeoutSec: number;
 	};
 	readonly layer2SkipMaxLines: number;
+	readonly mutation: MutationConfig;
+	readonly sandbox: SandboxConfig;
+	readonly pbt: PbtConfig;
+	readonly evolution: EvolutionConfig;
 }
 
 export interface ProjectDetection {

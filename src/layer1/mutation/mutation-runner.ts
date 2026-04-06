@@ -1,20 +1,20 @@
-import {
-	readFileSync,
-	writeFileSync,
-	mkdtempSync,
-	cpSync,
-	rmSync,
-} from "node:fs";
 import { execFileSync } from "node:child_process";
-import { join } from "node:path";
+import {
+	cpSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	symlinkSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
-import { relative } from "node:path";
+import { join, relative } from "node:path";
 import type {
+	GateResult,
 	Mutant,
 	MutantResult,
-	MutationReport,
 	MutationConfig,
-	GateResult,
+	MutationReport,
 } from "../../types.js";
 
 export function runMutationTests(
@@ -45,11 +45,13 @@ export function runMutationTests(
 			filter: (src) => !src.includes("node_modules") && !src.includes(".git"),
 		});
 
-		// Copy node_modules as symlink if exists
+		// Symlink node_modules for speed
 		try {
-			const nmSrc = join(targetDir, "node_modules");
-			const nmDst = join(tempDir, "node_modules");
-			cpSync(nmSrc, nmDst, { recursive: true, dereference: false });
+			symlinkSync(
+				join(targetDir, "node_modules"),
+				join(tempDir, "node_modules"),
+				"dir",
+			);
 		} catch {
 			// node_modules may not exist
 		}

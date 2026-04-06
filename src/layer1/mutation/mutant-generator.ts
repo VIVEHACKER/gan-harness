@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import type { Mutant } from "../../types.js";
-import { getOperators, applyOperator } from "./operators.js";
+import { applyOperator, getOperators } from "./operators.js";
 
 export function generateMutants(
 	filePath: string,

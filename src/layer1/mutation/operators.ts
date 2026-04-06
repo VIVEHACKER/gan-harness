@@ -19,10 +19,15 @@ const OPERATORS: readonly OperatorDef[] = [
 	{
 		name: "boundary-off-by-one",
 		apply: (line) => {
+			// Skip arrow functions
+			if (/=>/.test(line) && !/>=[^>]/.test(line)) return null;
 			if (/>=/.test(line)) return line.replace(">=", ">");
 			if (/<=/.test(line)) return line.replace("<=", "<");
-			if (/>(?!=)/.test(line)) return line.replace(/>(?!=)/, ">=");
-			if (/<(?!=)/.test(line)) return line.replace(/<(?!=)/, "<=");
+			// Only match standalone > or < (not in =>, >=, <=, >>)
+			if (/[^=<>]>[^=<>]/.test(line))
+				return line.replace(/([^=<>])>([^=<>])/, "$1>=$2");
+			if (/[^=<>]<[^=<>]/.test(line))
+				return line.replace(/([^=<>])<([^=<>])/, "$1<=$2");
 			return null;
 		},
 	},
@@ -74,12 +79,14 @@ const OPERATORS: readonly OperatorDef[] = [
 		name: "swap-arithmetic",
 		apply: (line) => {
 			if (/import\s/.test(line)) return null;
-			// Avoid ++, --, +=, -=, =>, //, /* patterns
-			if (/\+(?![+=])/.test(line) && !/['"`]/.test(line)) {
-				return line.replace(/\+(?![+=])/, "-");
+			// Skip lines with strings/templates to avoid false positives
+			if (/['"`]/.test(line)) return null;
+			// Skip unary +/- by requiring whitespace around operator
+			if (/\s\+\s/.test(line)) {
+				return line.replace(/\s\+\s/, " - ");
 			}
-			if (/(?<![/])\*(?![*/=])/.test(line)) {
-				return line.replace(/(?<![/])\*(?![*/=])/, "/");
+			if (/\s\*\s/.test(line)) {
+				return line.replace(/\s\*\s/, " / ");
 			}
 			return null;
 		},
